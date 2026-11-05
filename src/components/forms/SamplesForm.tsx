@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useSyncExternalStore } from "react";
-import { requestSamples, type FormState } from "@/app/actions";
+import { requestSamples } from "@/app/actions";
+import type { FormState } from "@/lib/lead";
 import { Button } from "@/components/ui/Button";
 import { samplesPage } from "@/content/site";
 

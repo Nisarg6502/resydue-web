@@ -42,3 +42,6 @@ next-env.d.ts
 
 # keep the template
 !.env.example
+
+# generated WebP variants for the static Pages build
+/public/images/_w/

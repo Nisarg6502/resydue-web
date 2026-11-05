@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { joinNewsletter, type FormState } from "@/app/actions";
+import { joinNewsletter } from "@/app/actions";
+import type { FormState } from "@/lib/lead";
 
 export function NewsletterForm({ className = "", tone = "dark" }: { className?: string; tone?: "dark" | "light" }) {
   const [state, action, pending] = useActionState<FormState, FormData>(joinNewsletter, null);

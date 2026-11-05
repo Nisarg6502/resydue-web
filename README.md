@@ -54,3 +54,21 @@ logged on the server.
 
 Built for Vercel (zero config): import the repo, set `LEAD_WEBHOOK_URL`, deploy. Point
 `resydue.com` at it. The canonical URL is set in `src/content/site.ts` (`site.url`).
+
+## GitHub Pages preview
+
+Every push to `main` runs `.github/workflows/pages.yml`, which publishes a static export to
+https://nisarg6502.github.io/resydue-web/ (kept out of search with `noindex`).
+
+The static build (`GITHUB_PAGES=true`) differs from the server build in three ways:
+
+- **Images**: `npm run images:variants` pre-generates WebP sizes into `public/images/_w/`, and `src/lib/image-loader.ts` picks the right one.
+- **Forms**: Server Actions can't run on Pages, so `src/lib/actions-static.ts` posts from the browser to `NEXT_PUBLIC_LEAD_ENDPOINT`. Set it as a repository variable (Settings → Secrets and variables → Actions → Variables), e.g. a Formspree endpoint. Until then, the forms validate and point people to WhatsApp/email.
+- **URLs**: everything lives under `/resydue-web/`, with trailing slashes.
+
+Build it locally:
+
+```bash
+npm run images:variants
+GITHUB_PAGES=true NEXT_PUBLIC_SITE_URL=https://nisarg6502.github.io/resydue-web npx next build   # → out/
+```

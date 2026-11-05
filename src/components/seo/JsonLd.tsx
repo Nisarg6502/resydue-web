@@ -1,5 +1,11 @@
 import { site } from "@/content/site";
 
+/** Share image (public/og.jpg, 1200x630). Relative, so it resolves against metadataBase incl. any basePath. */
+export const ogImage = { url: "/og.jpg", width: 1200, height: 630, alt: "Resydue plastic-free food packaging" };
+
+/** The static Pages export uses trailing slashes; keep structured-data and sitemap URLs canonical. */
+export const slash = process.env.NEXT_PUBLIC_BASE_PATH ? "/" : "";
+
 export function JsonLd({ data }: { data: unknown }) {
   return (
     <script
@@ -18,7 +24,7 @@ export function breadcrumbs(items: { name: string; path: string }[]) {
       "@type": "ListItem",
       position: i + 1,
       name: it.name,
-      item: `${site.url}${it.path === "/" ? "" : it.path}`,
+      item: `${site.url}${it.path === "/" ? "" : it.path}${slash}`,
     })),
   };
 }
@@ -29,7 +35,7 @@ export function pageMeta(path: string, meta: { title: string; description: strin
     title: { absolute: meta.title },
     description: meta.description,
     alternates: { canonical: path },
-    openGraph: { type: "website" as const, siteName: "Resydue", locale: "en_IN", url: path, title: meta.title, description: meta.description },
-    twitter: { title: meta.title, description: meta.description },
+    openGraph: { type: "website" as const, siteName: "Resydue", locale: "en_IN", url: path, title: meta.title, description: meta.description, images: [ogImage] },
+    twitter: { title: meta.title, description: meta.description, images: [ogImage.url] },
   };
 }

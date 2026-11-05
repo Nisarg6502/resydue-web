@@ -1,5 +1,9 @@
 import type { MetadataRoute } from "next";
 import { site } from "@/content/site";
+import { slash } from "@/components/seo/JsonLd";
+
+// Plain data, generated once at build time (required for the static Pages export).
+export const dynamic = "force-static";
 
 const routes: { path: string; priority: number; freq: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "", priority: 1, freq: "weekly" },
@@ -15,7 +19,7 @@ const routes: { path: string; priority: number; freq: MetadataRoute.Sitemap[numb
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return routes.map((r) => ({
-    url: `${site.url}${r.path}`,
+    url: `${site.url}${r.path}${slash}`,
     changeFrequency: r.freq,
     priority: r.priority,
   }));

@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { RevealObserver } from "@/components/ui/RevealObserver";
-import { JsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, ogImage } from "@/components/seo/JsonLd";
 import { home, site } from "@/content/site";
 import "./globals.css";
 
@@ -39,9 +39,13 @@ export const metadata: Metadata = {
     url: "/",
     title: home.meta.title,
     description: home.meta.description,
+    images: [ogImage],
   },
-  twitter: { card: "summary_large_image", title: home.meta.title, description: home.meta.description },
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large" } },
+  twitter: { card: "summary_large_image", title: home.meta.title, description: home.meta.description, images: [ogImage.url] },
+  robots:
+    process.env.NEXT_PUBLIC_NOINDEX === "true"
+      ? { index: false, follow: false }
+      : { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large" } },
   formatDetection: { telephone: false, email: false, address: false },
 };
 

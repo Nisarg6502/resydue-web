@@ -12,7 +12,8 @@
 
 export const site = {
   name: "Resydue",
-  url: "https://www.resydue.com",
+  // Overridden for preview builds (e.g. GitHub Pages) via NEXT_PUBLIC_SITE_URL.
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.resydue.com").replace(/\/$/, ""),
   tagline: "What's left, made to hold.",
   contact: {
     whatsapp: "[number]",
