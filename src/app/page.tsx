@@ -1,69 +1,67 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import { Hero } from "@/components/home/Hero";
+import { LiningSpecimen } from "@/components/home/LiningSpecimen";
+import { BreakItPanel, PhotoStrip, PromisesSection, RangeSection } from "@/components/home/Sections";
+import { LazyStressTest } from "@/components/home/LazyStressTest";
+import { pageMeta } from "@/components/seo/JsonLd";
+import { Reveal, WordsReveal } from "@/components/ui/Reveal";
+import { home } from "@/content/site";
 
-export default function Home() {
+export const metadata: Metadata = pageMeta("/", home.meta);
+
+export default function HomePage() {
+  const l = home.lining;
+  const w = home.worstDay;
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <Hero />
+
+      {/* 01 — The lining */}
+      <section aria-labelledby="lining-title" className="bg-ink py-24 text-linen sm:py-32">
+        <div className="container-x grid gap-12 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-4 lg:pt-4">
+            <Reveal as="p" className="eyebrow text-gold">
+              {l.eyebrow}
+            </Reveal>
+            <WordsReveal text={l.title} id="lining-title" className="display-md mt-5 max-w-[14ch]" />
+            <Reveal as="p" delay={160} className="lede mt-6 text-linen/70">
+              {l.body}
+            </Reveal>
+            <Reveal as="p" delay={240} className="mt-8 flex items-center gap-3 text-sm font-semibold text-linen/65">
+              <span aria-hidden className="inline-block h-px w-8 bg-gold" />
+              Drag across the cross-section
+            </Reveal>
+          </div>
+          <Reveal kind="fade" delay={120} className="lg:col-span-8">
+            <LiningSpecimen />
+          </Reveal>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* 02 — The worst day */}
+      <section aria-labelledby="worst-title" className="bg-linen py-24 sm:py-32">
+        <div className="container-x">
+          <div className="grid gap-8 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <Reveal as="p" className="eyebrow text-terra">
+                {w.eyebrow}
+              </Reveal>
+              <WordsReveal text={w.title} id="worst-title" className="display-lg mt-5 max-w-[15ch]" />
+            </div>
+            <Reveal as="p" delay={140} className="lede self-end text-ink/75 lg:col-span-5">
+              {w.body}
+            </Reveal>
+          </div>
+          <Reveal kind="fade" delay={100} className="mt-14 sm:mt-20">
+            <LazyStressTest />
+          </Reveal>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <RangeSection />
+      <PhotoStrip />
+      <PromisesSection />
+      <BreakItPanel />
+    </>
   );
 }

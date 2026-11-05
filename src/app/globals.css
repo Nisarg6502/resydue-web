@@ -1,26 +1,432 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────────
+   Resydue design tokens
+   Palette is locked to the brand guidelines (p.15). Do not add hues.
+   Tints are only opacity steps of these six colours.
+   ────────────────────────────────────────────────────────────── */
+@theme {
+  --color-linen: #f3e9dc; /* Pale Linen  · Light Neutral · 60% */
+  --color-ink: #010101; /* Deep Black  · Dark Neutral  · 60% */
+  --color-sand: #e2cba2; /* Soft Sand   · Base Color    · 30% */
+  --color-olive: #3e3f20; /* Olive Shadow· Accent Color  · 30% */
+  --color-gold: #ce8a39; /* Warm Gold   · Contrast      · 10% */
+  --color-terra: #a44819; /* Deep Terra  · Soft Contrast · 30/10% */
+
+  --font-sans: var(--font-raleway), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --radius-cell: 1.75rem;
+  --radius-cell-lg: 2.5rem;
+
+  --breakpoint-xs: 26rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --gutter: clamp(1rem, 3.2vw, 2.5rem);
+  --header-h: 4.5rem;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  scroll-padding-top: calc(var(--header-h) + 1rem);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-linen);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "lnum" 1, "kern" 1; /* Raleway defaults to old-style figures; specs need lining */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--color-terra);
+  color: var(--color-linen);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-terra);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ── Type ─────────────────────────────────────────────────────── */
+@utility display-xl {
+  font-weight: 700;
+  font-size: clamp(3.1rem, 10.4vw, 10.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.055em;
+}
+@utility display-lg {
+  font-weight: 700;
+  font-size: clamp(2.5rem, 6.6vw, 6.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+@utility display-md {
+  font-weight: 700;
+  font-size: clamp(2rem, 4.4vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+@utility title {
+  font-weight: 600;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+@utility lede {
+  font-weight: 400;
+  font-size: clamp(1.075rem, 1.35vw, 1.3rem);
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+}
+@utility eyebrow {
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+@utility tnum {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+@utility container-x {
+  width: 100%;
+  max-width: 100rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* ── Grain: one tiny inline SVG, GPU-cheap, gives paper tooth ── */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.22;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.24  0 0 0 0 0.25  0 0 0 0 0.13  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+}
+
+/* ── Placeholder token: anything not yet confirmed by a test ──── */
+.tbd {
+  display: inline-block;
+  padding: 0 0.32em;
+  margin: 0 0.04em;
+  border-radius: 0.3em;
+  border: 1px dashed color-mix(in oklab, currentColor 55%, transparent);
+  background: color-mix(in oklab, var(--color-gold) 16%, transparent);
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: help;
+}
+
+/* ── Reveal system (one shared IntersectionObserver, CSS does the motion) ── */
+[data-reveal] {
+  transition:
+    opacity 900ms var(--ease-out-strong),
+    transform 900ms var(--ease-out-strong),
+    clip-path 1100ms var(--ease-in-out-strong);
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
+.js [data-reveal="up"]:not([data-in]) {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+}
+.js [data-reveal="fade"]:not([data-in]) {
+  opacity: 0;
+}
+.js [data-reveal="clip"]:not([data-in]) {
+  clip-path: inset(100% 0 0 0 round var(--radius-cell));
+}
+[data-reveal="clip"] {
+  clip-path: inset(0 0 0 0 round var(--radius-cell));
+}
+
+/* Line mask for headline words */
+.line-mask {
+  display: inline-block;
+  overflow: clip;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.line-mask > span {
+  display: inline-block;
+  transition: transform 1000ms var(--ease-out-strong);
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
+.js [data-reveal-words]:not([data-in]) .line-mask > span {
+  transform: translate3d(0, 105%, 0);
+}
+
+/* Hero words play on load (no observer needed, CSS only) */
+@keyframes rise {
+  from {
+    transform: translate3d(0, 105%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes cell-in {
+  from {
+    clip-path: inset(100% 0 0 0 round var(--radius-cell));
+  }
+  to {
+    clip-path: inset(0 0 0 0 round var(--radius-cell));
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hero-word {
+  animation: rise 820ms var(--ease-out-strong) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+.hero-cell {
+  animation: cell-in 950ms var(--ease-in-out-strong) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+.hero-fade {
+  animation: fade-up 800ms var(--ease-out-strong) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+
+/* Marquee */
+@keyframes marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.marquee-track {
+  animation: marquee var(--marquee-speed, 60s) linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Promise lines: scroll-driven ink fill where supported (zero JS) */
+@supports (animation-timeline: view()) {
+  @keyframes ink {
+    from {
+      background-size:
+        0% 100%,
+        100% 100%;
+    }
+    to {
+      background-size:
+        100% 100%,
+        100% 100%;
+    }
+  }
+  .ink-fill {
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    background-image:
+      linear-gradient(var(--ink-on, var(--color-ink)), var(--ink-on, var(--color-ink))),
+      linear-gradient(var(--ink-off), var(--ink-off));
+    background-repeat: no-repeat;
+    background-size:
+      0% 100%,
+      100% 100%;
+    animation: ink linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 45%;
+  }
+}
+
+/* Page enter */
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.page-enter {
+  animation: page-in 420ms var(--ease-out-strong) both;
+}
+
+/* Rain for the stress-test stage */
+@keyframes rain {
+  from {
+    transform: translate3d(0, -20%, 0);
+  }
+  to {
+    transform: translate3d(-6%, 20%, 0);
+  }
+}
+@keyframes road {
+  to {
+    background-position: -240px 0;
+  }
+}
+@keyframes steam {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scaleY(0.8);
+  }
+  30% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -60px, 0) scaleY(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal],
+  .line-mask > span {
+    transition-property: opacity !important;
+    transition-duration: 300ms !important;
+  }
+  .js [data-reveal]:not([data-in]),
+  .js [data-reveal-words]:not([data-in]) .line-mask > span {
+    transform: none !important;
+    clip-path: none !important;
+  }
+  .marquee-track {
+    animation: none !important;
+  }
+}
+
+@keyframes bob {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+/* Break-it crack: draws when its panel is revealed */
+.crack path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1600ms var(--ease-in-out-strong) 500ms;
+}
+[data-in] .crack path,
+html:not(.js) .crack path {
+  stroke-dashoffset: 0;
+}
+
+/* Exploded layers (coating page). Base = separated; scroll-driven where supported. */
+.explode .layer {
+  transform: rotateX(58deg) rotateZ(-38deg) translateZ(calc((1 - var(--i)) * 70px));
+}
+@supports (animation-timeline: view()) {
+  @keyframes explode {
+    from {
+      transform: rotateX(58deg) rotateZ(-38deg) translateZ(calc((1 - var(--i)) * 12px));
+    }
+    to {
+      transform: rotateX(58deg) rotateZ(-38deg) translateZ(calc((1 - var(--i)) * 78px));
+    }
+  }
+  .explode .layer {
+    animation: explode linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 50%;
+  }
+}
+
+/* Strike-through that draws itself */
+.strike {
+  position: relative;
+  display: inline-block;
+}
+.strike::after {
+  content: "";
+  position: absolute;
+  left: -0.04em;
+  right: -0.04em;
+  top: 52%;
+  height: 0.09em;
+  border-radius: 1em;
+  background: var(--color-terra);
+  transform-origin: left;
+  transform: scaleX(1);
+  transition: transform 900ms var(--ease-in-out-strong) calc(var(--d, 0) * 1ms + 300ms);
+}
+.js [data-reveal]:not([data-in]) .strike::after,
+.js .strike[data-reveal]:not([data-in])::after {
+  transform: scaleX(0);
+}
+
+/* Native <details> with animated height where supported */
+:root {
+  interpolate-size: allow-keywords;
+}
+details.faq::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 350ms var(--ease-out-strong),
+    content-visibility 350ms allow-discrete;
+}
+details.faq[open]::details-content {
+  block-size: auto;
+}
+details.faq summary::-webkit-details-marker {
+  display: none;
+}
+details.faq .plus {
+  transition: transform 300ms var(--ease-out-strong);
+}
+details.faq[open] .plus {
+  transform: rotate(45deg);
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 40;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
