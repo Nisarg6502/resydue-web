@@ -37,7 +37,7 @@ export async function requestSamples(_: FormState, form: FormData): Promise<Form
   if (!endpoint) return { ok: false, message: notConnected, values: data };
   const sent = await deliver("samples", data);
   if (!sent) return { ok: false, message: "That did not go through. Please try again, or message us on WhatsApp.", values: data };
-  return { ok: true, message: samplesThanks(data.name) };
+  return { ok: true, message: samplesThanks(data.name, data.intent) };
 }
 
 export async function joinNewsletter(_: FormState, form: FormData): Promise<FormState> {

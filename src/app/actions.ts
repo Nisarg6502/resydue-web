@@ -14,7 +14,8 @@ async function deliver(kind: "samples" | "newsletter", data: Record<string, unkn
   const payload = { kind, submittedAt: new Date().toISOString(), ...data };
   const url = process.env.LEAD_WEBHOOK_URL;
   if (!url) {
-    console.info("[lead] LEAD_WEBHOOK_URL not set. Submission:", JSON.stringify(payload));
+    const shown = { ...payload, mockup: data.mockup ? `[jpeg, ${String(data.mockup).length} chars]` : undefined };
+    console.info("[lead] LEAD_WEBHOOK_URL not set. Submission:", JSON.stringify(shown));
     return true;
   }
   try {
@@ -37,7 +38,7 @@ export async function requestSamples(_: FormState, form: FormData): Promise<Form
   if (Object.keys(errors).length) return { ok: false, message: "A couple of things to fix.", errors, values: data };
   const sent = await deliver("samples", data);
   if (!sent) return { ok: false, message: "That did not go through. Please try again, or message us on WhatsApp.", values: data };
-  return { ok: true, message: samplesThanks(data.name) };
+  return { ok: true, message: samplesThanks(data.name, data.intent) };
 }
 
 export async function joinNewsletter(_: FormState, form: FormData): Promise<FormState> {

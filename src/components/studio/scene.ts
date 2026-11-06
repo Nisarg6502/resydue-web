@@ -67,7 +67,8 @@ export type StudioState = {
 export type Studio = {
   set: (patch: Partial<StudioState>) => void;
   resetView: () => void;
-  snapshot: (caption: { font: string; label: string }) => Promise<Blob | null>;
+  /** front: render from the default front view (logo facing camera), whatever the turntable is doing */
+  snapshot: (caption: { font: string; label: string; front?: boolean }) => Promise<Blob | null>;
   onInteract: (fn: () => void) => void;
   dispose: () => void;
 };
@@ -941,7 +942,7 @@ export function createStudio(canvas: HTMLCanvasElement, initial: StudioState): S
     onInteract(fn) {
       interactFns.push(fn);
     },
-    async snapshot({ font, label }) {
+    async snapshot({ font, label, front }) {
       // Render once at a print-friendly resolution, then compose on linen with a caption.
       const prevRatio = renderer.getPixelRatio();
       const w = canvas.clientWidth;
@@ -949,7 +950,15 @@ export function createStudio(canvas: HTMLCanvasElement, initial: StudioState): S
       const ratio = Math.max(2, Math.min(3, 2400 / w));
       renderer.setPixelRatio(ratio);
       renderer.setSize(w, h, false);
+      const keepP = camera.position.clone();
+      const keepT = controls.target.clone();
+      if (front && current) frame(current, false);
       renderer.render(scene, camera);
+      if (front) {
+        camera.position.copy(keepP);
+        controls.target.copy(keepT);
+        controls.update();
+      }
       const out = document.createElement("canvas");
       out.width = canvas.width;
       out.height = canvas.height;

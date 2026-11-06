@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useSyncExternalStore } from "react";
+import { useActionState, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+import { clearHandoff, parseHandoff, readHandoffRaw, subscribeHandoff, type Handoff } from "@/components/studio/design";
 import { requestSamples } from "@/app/actions";
 import type { FormState } from "@/lib/lead";
 import { Button } from "@/components/ui/Button";
@@ -54,6 +55,35 @@ function Chips({
 
 const noop = () => () => {};
 
+/** The mockup someone made in the logo studio, carried over so they do not start from scratch. */
+function DesignCard({ design, sendDefault }: { design: Handoff; sendDefault: boolean }) {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-linen ring-1 ring-inset ring-olive/20">
+      <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={design.image} alt="Your mockup from the logo studio" className="aspect-[4/3] w-full rounded-xl object-cover sm:w-40" />
+        <div className="min-w-0 flex-1">
+          <p className="eyebrow text-terra">Your design</p>
+          <p className="mt-2 text-[1.02rem] font-semibold leading-snug">{design.summary}</p>
+          <p className="mt-1 truncate text-[0.85rem] text-ink/60">Logo file: {design.logoName}</p>
+          <button type="button" onClick={clearHandoff} className="mt-2 text-[0.85rem] font-semibold text-ink/55 hover:text-ink">
+            Remove design
+          </button>
+        </div>
+      </div>
+      <label className="flex cursor-pointer items-start gap-3 border-t border-ink/10 bg-sand/30 px-4 py-3.5 sm:px-5">
+        <input type="checkbox" name="mockup" value={design.image} defaultChecked={sendDefault} className="mt-0.5 size-5 shrink-0 accent-terra" />
+        <span className="text-[0.9rem] leading-snug">
+          <span className="font-semibold">Send this mockup image with my request.</span>{" "}
+          <span className="text-ink/60">Untick it and we will ask for your artwork on WhatsApp or email instead. Your original logo file is never sent.</span>
+        </span>
+      </label>
+      <input type="hidden" name="design" value={`${design.summary}. Logo: ${design.logoName}`} />
+      <input type="hidden" name="designLink" value={design.link} />
+    </div>
+  );
+}
+
 export function SamplesForm() {
   const [state, action, pending] = useActionState<FormState, FormData>(requestSamples, null);
   const intent = useSyncExternalStore(
@@ -61,13 +91,23 @@ export function SamplesForm() {
     () => (new URLSearchParams(window.location.search).get("intent") === "custom" ? "custom" : "samples"),
     () => "samples",
   );
+  const wantsDesign = useSyncExternalStore(
+    noop,
+    () => new URLSearchParams(window.location.search).has("design"),
+    () => false,
+  );
+  const raw = useSyncExternalStore(subscribeHandoff, readHandoffRaw, () => null);
+  const design = useMemo(() => (intent === "custom" && wantsDesign ? parseHandoff(raw) : null), [intent, wantsDesign, raw]);
   const done = useRef<HTMLDivElement>(null);
   const e = state?.errors ?? {};
   const v = state?.values ?? {};
   const val = (k: string) => (typeof v[k] === "string" ? (v[k] as string) : undefined);
 
   useEffect(() => {
-    if (state?.ok) done.current?.focus();
+    if (state?.ok) {
+      done.current?.focus();
+      clearHandoff();
+    }
     else if (state?.errors) {
       const first = document.querySelector<HTMLElement>("[aria-invalid=true]");
       first?.focus?.();
@@ -93,7 +133,9 @@ export function SamplesForm() {
       <input type="hidden" name="intent" value={intent} />
       <input type="text" name="company_website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
 
-      {intent === "custom" ? (
+      {design ? (
+        <DesignCard design={design} sendDefault={state ? !!val("mockup") : true} />
+      ) : intent === "custom" ? (
         <p className="rounded-2xl bg-linen px-5 py-4 text-[0.95rem] font-semibold text-olive ring-1 ring-inset ring-olive/20">
           Custom quote request: we will include branding options in our reply.
         </p>

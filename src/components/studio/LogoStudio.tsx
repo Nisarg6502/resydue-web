@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { ButtonLink } from "@/components/ui/Button";
 import { Rich } from "@/components/ui/Rich";
 import type { Ink, Paper, ProductKey, Studio } from "./scene";
+import { decodeDesign, describeDesign, saveHandoff, shareLink, toJpeg, type Design } from "./design";
 import { loadLogo, placeholderLogo, type Logo } from "./logo";
 
 /** fibre = the finish each pack is photographed in; lid = label pair for the lid button */
@@ -33,6 +35,7 @@ export function LogoStudio({ quoteHref, terms }: { quoteHref: string; terms: str
   const studioRef = useRef<Studio | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const ids = useId();
+  const router = useRouter();
 
   const [status, setStatus] = useState<Status>("idle");
   const [product, setProduct] = useState<ProductKey>("box");
@@ -48,8 +51,20 @@ export function LogoStudio({ quoteHref, terms }: { quoteHref: string; terms: str
   const [dragging, setDragging] = useState(false);
   const [touched, setTouched] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [handing, setHanding] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const effectiveInk: Ink = inkMode === "original" ? "original" : ink;
+  const design: Design = { product, paper, ink: effectiveInk, scale };
+  const current = PRODUCTS.find((p) => p.key === product)!;
+  const hasLogo = !!logo && !logo.placeholder;
+  const caption = `Resydue ${current.label} · illustration, not to scale`;
+
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => setNotice(null), 5000);
+    return () => clearTimeout(t);
+  }, [notice]);
 
   // Boot three.js only when the studio is about to be seen.
   useEffect(() => {
@@ -68,11 +83,21 @@ export function LogoStudio({ quoteHref, terms }: { quoteHref: string; terms: str
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const initialLogo = placeholderLogo(bodyFont());
         setLogo((l) => l ?? initialLogo);
+        // A shared link (?pack=cup&fibre=white&print=olive&size=80) reopens that setup.
+        const shared = decodeDesign(window.location.search);
+        const start: Design = { product: "box", paper: "natural", ink: "original", scale: 0.72, ...shared };
+        if (shared) {
+          setProduct(start.product);
+          setPaper(start.paper);
+          setScale(start.scale);
+          if (start.ink === "original") setInkMode("original");
+          else {
+            setInkMode("one");
+            setInk(start.ink);
+          }
+        }
         studio = createStudio(canvas, {
-          product: "box",
-          paper: "natural",
-          ink: "original",
-          scale: 0.72,
+          ...start,
           autoRotate: !reducedMotion,
           lidOpen: false,
           logo: initialLogo.canvas,
@@ -156,8 +181,7 @@ export function LogoStudio({ quoteHref, terms }: { quoteHref: string; terms: str
     if (!s) return;
     setSaving(true);
     try {
-      const label = `Resydue ${PRODUCTS.find((p) => p.key === product)!.label} · illustration, not to scale`;
-      const blob = await s.snapshot({ font: bodyFont(), label });
+      const blob = await s.snapshot({ font: bodyFont(), label: caption });
       if (!blob) return;
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -169,8 +193,45 @@ export function LogoStudio({ quoteHref, terms }: { quoteHref: string; terms: str
     }
   };
 
-  const current = PRODUCTS.find((p) => p.key === product)!;
-  const hasLogo = !!logo && !logo.placeholder;
+  /** Share the setup as a link; on devices that can, share the mockup image along with it. */
+  const share = async () => {
+    const url = shareLink(design);
+    const s = studioRef.current;
+    try {
+      // Ask before rendering, so the copy below still runs inside the click on desktops.
+      const canShareFiles =
+        typeof navigator.canShare === "function" && navigator.canShare({ files: [new File([""], "x.png", { type: "image/png" })] });
+      if (hasLogo && s && canShareFiles) {
+        const blob = await s.snapshot({ font: bodyFont(), label: caption, front: true });
+        const file = blob ? new File([blob], `resydue-${product}-mockup.png`, { type: "image/png" }) : null;
+        if (file && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: "Our logo on a Resydue pack", text: `${describeDesign(design)}. Open the setup: ${url}` });
+          return;
+        }
+      }
+      await navigator.clipboard.writeText(url);
+      setNotice(hasLogo ? "Link copied. It opens this setup. Your logo stays with you, so send the image too." : "Link copied. It opens this exact setup.");
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return; // share sheet closed
+      history.replaceState(null, "", url);
+      setNotice("Could not copy. The link is now in your address bar.");
+    }
+  };
+
+  /** Carry the mockup into the quote form instead of making people start over. */
+  const quote = async (e: MouseEvent<HTMLAnchorElement>) => {
+    const s = studioRef.current;
+    if (!hasLogo || !s || e.metaKey || e.ctrlKey || e.shiftKey) return; // plain link
+    e.preventDefault();
+    setHanding(true);
+    try {
+      const blob = await s.snapshot({ font: bodyFont(), label: caption, front: true });
+      if (blob) saveHandoff({ summary: describeDesign(design), link: shareLink(design), logoName: logo.name, image: await toJpeg(blob) });
+    } catch (err) {
+      console.error(err);
+    }
+    router.push(`${quoteHref}${quoteHref.includes("?") ? "&" : "?"}design=1`);
+  };
 
   return (
     <div
@@ -234,6 +295,14 @@ export function LogoStudio({ quoteHref, terms }: { quoteHref: string; terms: str
           <div className="pointer-events-none absolute inset-x-3 bottom-3 flex items-end justify-between gap-3 sm:inset-x-4 sm:bottom-4">
             <p
               aria-live="polite"
+              className={`absolute inset-x-0 bottom-14 mx-auto w-fit max-w-full rounded-2xl bg-ink px-4 py-2.5 text-center text-[0.82rem] font-semibold text-linen shadow-lg transition-[opacity,transform] duration-300 ease-[var(--ease-out-strong)] ${
+                notice ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
+              }`}
+            >
+              {notice}
+            </p>
+            <p
+              aria-hidden
               className={`hidden items-center gap-2 whitespace-nowrap rounded-full bg-linen/70 px-3 py-2 text-[0.8rem] sm:flex font-semibold text-ink/70 backdrop-blur-md transition-opacity duration-500 ${
                 status === "ready" && !touched ? "opacity-100" : "opacity-0"
               }`}
@@ -265,6 +334,11 @@ export function LogoStudio({ quoteHref, terms }: { quoteHref: string; terms: str
               <IconBtn label="Reset view" onClick={() => studioRef.current?.resetView()}>
                 <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M2.8 8a5.2 5.2 0 1 0 1.6-3.75M2.6 2.2v3h3" />
+                </svg>
+              </IconBtn>
+              <IconBtn label="Copy a link to this setup" onClick={share} disabled={status !== "ready"}>
+                <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M6.8 9.2a2.6 2.6 0 0 0 3.7 0l2.1-2.1a2.6 2.6 0 0 0-3.7-3.7l-.8.8M9.2 6.8a2.6 2.6 0 0 0-3.7 0L3.4 8.9a2.6 2.6 0 0 0 3.7 3.7l.8-.8" />
                 </svg>
               </IconBtn>
               <IconBtn label="Download image" onClick={save} disabled={status !== "ready" || saving}>
@@ -443,9 +517,12 @@ export function LogoStudio({ quoteHref, terms }: { quoteHref: string; terms: str
           </Field>
 
           <div className="mt-auto border-t border-ink/12 pt-6">
-            <ButtonLink href={quoteHref} tone="terra" className="w-full justify-between">
-              {hasLogo ? "Quote this design" : "Request a custom quote"}
+            <ButtonLink href={quoteHref} onClick={quote} aria-busy={handing} tone="terra" className="w-full justify-between">
+              {handing ? "Preparing your design…" : hasLogo ? "Quote this design" : "Request a custom quote"}
             </ButtonLink>
+            {hasLogo ? (
+              <p className="mt-2 text-[0.8rem] text-ink/55">Your mockup and settings come with you to the form. You choose whether to send them.</p>
+            ) : null}
             <p className="mt-3 text-[0.82rem] leading-relaxed text-ink/60">
               <Rich text={terms} /> This preview is an illustration for presentation only, not to scale. Shapes, colours and print placement are approximate; every custom run is proofed with you first.
             </p>
