@@ -344,17 +344,6 @@ html.lenis body {
   }
 }
 
-/* Break-it crack: draws when its panel is revealed */
-.crack path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition: stroke-dashoffset 1600ms var(--ease-in-out-strong) 500ms;
-}
-[data-in] .crack path,
-html:not(.js) .crack path {
-  stroke-dashoffset: 0;
-}
-
 /* Exploded layers (coating page). Base = separated; scroll-driven where supported. */
 .explode .layer {
   transform: rotateX(58deg) rotateZ(-38deg) translateZ(calc((1 - var(--i)) * 70px));
@@ -429,4 +418,51 @@ details.faq[open] .plus {
   to {
     stroke-dashoffset: 0;
   }
+}
+
+/* Logo studio size slider: brand-coloured track with a filled portion */
+.studio-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2.25rem;
+  background: transparent;
+  cursor: pointer;
+}
+.studio-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(var(--color-terra), var(--color-terra)) 0 / var(--fill, 50%) 100% no-repeat,
+    color-mix(in oklab, var(--color-ink) 12%, transparent);
+}
+.studio-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-ink) 12%, transparent);
+}
+.studio-range::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-terra);
+}
+.studio-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--color-linen);
+  box-shadow:
+    0 0 0 2px var(--color-ink),
+    0 4px 10px -2px rgb(62 63 32 / 0.4);
+  transition: transform 150ms var(--ease-out-strong);
+}
+.studio-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: var(--color-linen);
+}
+.studio-range:active::-webkit-slider-thumb {
+  transform: scale(1.12);
 }

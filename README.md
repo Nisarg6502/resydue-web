@@ -18,6 +18,7 @@ npm run build && npm start
 | Official logo vectors (auto-extracted, do not edit) | `src/components/brand/logo-paths.ts` |
 | Pages | `src/app/*/page.tsx` |
 | Signature interactions | `src/components/home/LiningSpecimen.tsx`, `StressTest.tsx`, `src/components/layout/PatternField.tsx`, `src/components/coating/ExplodedLayers.tsx` |
+| 3D logo studio (products page): UI, three.js scene, logo processing | `src/components/studio/LogoStudio.tsx`, `scene.ts`, `logo.ts`. three.js is lazy-loaded only when the studio nears the viewport. Packs are built procedurally (no model files); swap in real GLB models later by replacing the builders in `scene.ts`. |
 | Lead capture (samples form, newsletter) | `src/app/actions.ts` |
 | SEO: sitemap, robots, manifest, OG image, icons | `src/app/sitemap.ts`, `robots.ts`, `manifest.ts`, `opengraph-image.jpg`, `icon.svg`, `apple-icon.png` |
 

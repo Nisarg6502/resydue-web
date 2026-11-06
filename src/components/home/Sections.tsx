@@ -91,6 +91,27 @@ export function RangeSection() {
             </Reveal>
           ))}
         </ul>
+
+        <Reveal
+          delay={120}
+          className="mt-10 flex flex-col gap-6 rounded-[var(--radius-cell)] bg-olive px-6 py-7 text-linen sm:mt-14 sm:flex-row sm:items-center sm:justify-between sm:px-10"
+        >
+          <div className="flex items-center gap-5">
+            <span aria-hidden className="hidden size-14 shrink-0 place-items-center rounded-full bg-linen/10 text-gold sm:grid">
+              <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+                <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" />
+                <path d="m4 7.5 8 4.5 8-4.5M12 12v9" />
+              </svg>
+            </span>
+            <div>
+              <p className="eyebrow text-gold">Logo studio</p>
+              <p className="title mt-2">See your logo on our packs, in 3D.</p>
+            </div>
+          </div>
+          <ButtonLink href="/products#studio" tone="linen" className="self-start sm:self-auto">
+            Try it with your logo
+          </ButtonLink>
+        </Reveal>
       </div>
     </section>
   );
@@ -119,7 +140,7 @@ export function PhotoStrip() {
         </Reveal>
       </div>
       <div className="marquee flex">
-        <ul className="marquee-track flex shrink-0 gap-3 pr-3 sm:gap-4 sm:pr-4" style={{ "--marquee-speed": "70s" } as CSSProperties}>
+        <ul className="marquee-track flex shrink-0 items-start gap-3 pr-3 sm:gap-4 sm:pr-4" style={{ "--marquee-speed": "70s" } as CSSProperties}>
           {[...strip, ...strip].map((s, i) => (
             <li
               key={i}
@@ -183,22 +204,6 @@ export function BreakItPanel({ title = home.breakIt.title, body = home.breakIt.b
     <section aria-labelledby="break-title" className="bg-linen py-6 sm:py-10">
       <div className="container-x">
         <Reveal kind="clip" className="grain relative overflow-hidden rounded-[var(--radius-cell-lg)] bg-terra px-6 py-16 text-linen sm:px-12 sm:py-24 lg:px-20 lg:py-28">
-          {/* a crack that draws itself across the panel */}
-          <svg
-            aria-hidden
-            viewBox="0 0 1200 400"
-            preserveAspectRatio="none"
-            className="crack pointer-events-none absolute inset-0 h-full w-full text-gold"
-            fill="none"
-          >
-            <path
-              d="M-10 250 L180 232 L230 268 L360 210 L420 236 L540 170 L600 204 L700 150 L760 182 L880 120 L940 150 L1060 92 L1210 110"
-              stroke="currentColor"
-              strokeWidth="2"
-              vectorEffect="non-scaling-stroke"
-              pathLength={1}
-            />
-          </svg>
           <div className="relative z-10 grid gap-10 lg:grid-cols-12 lg:items-end">
             <h2 id="break-title" className="display-xl [text-wrap:balance] lg:col-span-8">
               {title}

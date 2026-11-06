@@ -6,6 +6,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { PageHero } from "@/components/ui/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { Rich } from "@/components/ui/Rich";
+import { LogoStudio } from "@/components/studio/LogoStudio";
 import { products, productsPage } from "@/content/site";
 
 export const metadata: Metadata = pageMeta("/products", productsPage.meta);
@@ -15,19 +16,58 @@ export default function ProductsPage() {
   return (
     <>
       <JsonLd data={breadcrumbs([{ name: "Range", path: "/products" }])} />
-      <PageHero eyebrow="The range" title={productsPage.title} body={productsPage.body}>
-        <nav aria-label="Jump to product" className="flex flex-wrap gap-2">
-          {products.map((p) => (
-            <a
-              key={p.slug}
-              href={`#${p.slug}`}
-              className="inline-flex min-h-11 items-center rounded-full px-5 text-[0.92rem] font-semibold ring-1 ring-inset ring-ink/15 transition-[box-shadow,background-color] duration-200 hover:bg-ink hover:text-linen hover:ring-ink"
-            >
-              {p.name.replace("Resydue ", "")}
+      <PageHero
+        eyebrow="The range"
+        title={productsPage.title}
+        body={productsPage.body}
+        aside={
+          <nav aria-label="Jump to product" className="lg:pt-14">
+            <p className="eyebrow flex items-center justify-between text-ink/60">
+              <span>In the range</span>
+              <span className="tnum">{String(products.length).padStart(2, "0")}</span>
+            </p>
+            <ul className="mt-4 border-t border-ink/15">
+              {products.map((p, i) => (
+                <li key={p.slug}>
+                  <a
+                    href={`#${p.slug}`}
+                    className="group flex items-center gap-4 border-b border-ink/15 py-3 transition-colors duration-200 sm:gap-5"
+                  >
+                    <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl bg-gold sm:size-16">
+                      <Image
+                        src={p.image}
+                        alt=""
+                        fill
+                        sizes="64px"
+                        className="object-cover transition-transform duration-700 ease-[var(--ease-out-strong)] group-hover:scale-110"
+                      />
+                    </span>
+                    <span className="eyebrow tnum w-6 shrink-0 text-terra">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[1.05rem] font-semibold tracking-[-0.01em]">{p.name.replace("Resydue ", "")}</span>
+                      <span className="block truncate text-[0.9rem] text-ink/60">{p.forWhat}</span>
+                    </span>
+                    <span
+                      aria-hidden
+                      className="grid size-9 shrink-0 place-items-center rounded-full ring-1 ring-inset ring-ink/15 transition-[background-color,color,box-shadow] duration-300 group-hover:bg-ink group-hover:text-linen group-hover:ring-ink"
+                    >
+                      <svg viewBox="0 0 16 16" className="size-3.5 rotate-90" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" />
+                      </svg>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <a href="#studio" className="group mt-5 inline-flex items-center gap-2 text-[0.95rem] font-semibold text-terra">
+              <span className="underline decoration-terra/30 underline-offset-4 transition-[text-decoration-color] group-hover:decoration-terra">
+                Preview your logo on the range in 3D
+              </span>
+              <span aria-hidden>↓</span>
             </a>
-          ))}
-        </nav>
-      </PageHero>
+          </nav>
+        }
+      />
 
       <section aria-label="Products" className="pb-24 sm:pb-32">
         <div className="container-x space-y-20 sm:space-y-28">
@@ -77,39 +117,31 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      {/* Custom branding */}
-      <section aria-labelledby="custom-title" className="bg-olive py-24 text-linen sm:py-32">
-        <div className="container-x grid gap-12 lg:grid-cols-12 lg:items-center">
-          <div className="lg:col-span-6">
-            <Reveal as="p" className="eyebrow text-gold">
-              Custom runs
-            </Reveal>
-            <Reveal as="h2" id="custom-title" delay={60} className="display-lg mt-5 max-w-[12ch]">
-              {c.title}
-            </Reveal>
-            <Reveal as="p" delay={120} className="lede mt-6 text-linen/80">
-              <Rich text={c.body} />
-            </Reveal>
-            <Reveal as="p" delay={160} className="mt-3 text-linen/65">
-              <Rich text={c.terms} />
-            </Reveal>
-            <Reveal delay={220} className="mt-10 flex flex-wrap gap-3">
-              <ButtonLink href={c.primary.href} tone="linen">
-                {c.primary.label}
-              </ButtonLink>
-              <ButtonLink href={c.secondary.href} tone="outline-linen">
-                {c.secondary.label}
-              </ButtonLink>
-            </Reveal>
+      {/* Custom branding + 3D logo studio */}
+      <section aria-labelledby="custom-title" className="bg-olive py-20 text-linen sm:py-28">
+        <div className="container-x">
+          <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-7">
+              <Reveal as="p" className="eyebrow text-gold">
+                Custom runs
+              </Reveal>
+              <Reveal as="h2" id="custom-title" delay={60} className="display-lg mt-5 max-w-[13ch]">
+                {c.title}
+              </Reveal>
+            </div>
+            <div className="lg:col-span-5">
+              <Reveal as="p" delay={120} className="lede text-linen/80">
+                <Rich text={c.body} /> Try it below: drop in your logo and see it on the pack before you ask us for a quote.
+              </Reveal>
+              <Reveal delay={180} className="mt-6">
+                <ButtonLink href={c.secondary.href} tone="outline-linen">
+                  {c.secondary.label}
+                </ButtonLink>
+              </Reveal>
+            </div>
           </div>
-          <Reveal kind="clip" className="relative aspect-[5/4] overflow-hidden rounded-[var(--radius-cell-lg)] bg-gold lg:col-span-6">
-            <Image
-              src="/images/boxes-stack-sandwich.jpg"
-              alt="Stacked Resydue boxes beside an open box with a sandwich and fries"
-              fill
-              sizes="(min-width: 1024px) 46vw, 92vw"
-              className="object-cover"
-            />
+          <Reveal delay={120} className="mt-12 sm:mt-16">
+            <LogoStudio quoteHref={c.primary.href} terms={c.terms} />
           </Reveal>
         </div>
       </section>

@@ -29,7 +29,7 @@ export default function HomePage() {
             </Reveal>
             <Reveal as="p" delay={240} className="mt-8 flex items-center gap-3 text-sm font-semibold text-linen/65">
               <span aria-hidden className="inline-block h-px w-8 bg-gold" />
-              Drag across the cross-section
+              Compare the two walls, then see what is left after composting
             </Reveal>
           </div>
           <Reveal kind="fade" delay={120} className="lg:col-span-8">
