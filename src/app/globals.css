@@ -466,3 +466,16 @@ details.faq[open] .plus {
 .studio-range:active::-webkit-slider-thumb {
   transform: scale(1.12);
 }
+
+/* Lining comparison: shows the loop is about to move on */
+@keyframes loop-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.loop-progress {
+  animation: loop-progress linear both;
+}

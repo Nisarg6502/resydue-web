@@ -228,38 +228,54 @@ function WallCue() {
   );
 }
 
+/** How long each state holds before the loop moves on (ms). A click restarts with a longer hold. */
+const HOLD: Record<Stage, number> = { use: 3000, compost: 3000 };
+const HOLD_AFTER_CLICK = 4500;
+
 export function LiningSpecimen() {
   const [stage, setStage] = useState<Stage>("use");
+  const [visible, setVisible] = useState(false);
+  const [reduced, setReduced] = useState(false);
+  const [hold, setHold] = useState(HOLD.use);
+  // bumps on every change so the timer and progress bar restart
+  const [cycle, setCycle] = useState(0);
   const wrap = useRef<HTMLDivElement>(null);
-  const touched = useRef(false);
 
-  // Play the story once when it comes into view: in use, then after composting.
+  // Loop only while on screen.
   useEffect(() => {
     const el = wrap.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let timer = 0;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        io.disconnect();
-        timer = window.setTimeout(() => {
-          if (!touched.current) setStage("compost");
-        }, 3200);
-      },
-      { threshold: 0.6 },
-    );
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onMq = () => setReduced(mq.matches);
+    onMq();
+    mq.addEventListener("change", onMq);
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.35 });
     io.observe(el);
     return () => {
       io.disconnect();
-      window.clearTimeout(timer);
+      mq.removeEventListener("change", onMq);
     };
   }, []);
 
+  // In use → after composting → in use … forever, with a pause on each.
+  useEffect(() => {
+    if (!visible || reduced) return;
+    const t = window.setTimeout(() => {
+      const next: Stage = stage === "use" ? "compost" : "use";
+      setStage(next);
+      setHold(HOLD[next]);
+      setCycle((c) => c + 1);
+    }, hold);
+    return () => window.clearTimeout(t);
+  }, [stage, visible, reduced, hold, cycle]);
+
   const pick = (s: Stage) => {
-    touched.current = true;
     setStage(s);
+    setHold(HOLD_AFTER_CLICK);
+    setCycle((c) => c + 1);
   };
+
+  const looping = visible && !reduced;
 
   return (
     <div ref={wrap}>
@@ -271,9 +287,17 @@ export function LiningSpecimen() {
         <div role="radiogroup" aria-label="Show the wall" className="relative grid shrink-0 grid-cols-2 rounded-full bg-linen/10 p-1 ring-1 ring-inset ring-linen/15">
           <span
             aria-hidden
-            className="absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-linen transition-transform duration-500 ease-[var(--ease-out-strong)]"
+            className="absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] overflow-hidden rounded-full bg-linen transition-transform duration-500 ease-[var(--ease-out-strong)]"
             style={{ transform: stage === "compost" ? "translateX(100%)" : "none" }}
-          />
+          >
+            {looping ? (
+              <i
+                key={cycle}
+                className="loop-progress absolute inset-x-3 bottom-1 block h-[2px] origin-left rounded-full bg-terra/70"
+                style={{ animationDuration: `${hold}ms` }}
+              />
+            ) : null}
+          </span>
           {(
             [
               ["use", "In use"],
